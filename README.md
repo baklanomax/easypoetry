@@ -10,4 +10,4 @@
 9. make
 10. sudo make install
 
-Based on: https://github.com/snaptoken/kilo-src
+Основано на: https://github.com/snaptoken/kilo-src
