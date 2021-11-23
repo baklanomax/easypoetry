@@ -1,4 +1,4 @@
-/*** includes ***/
+/* includes */
 
 #define _DEFAULT_SOURCE
 #define _BSD_SOURCE
@@ -17,7 +17,7 @@
 #include <time.h>
 #include <unistd.h>
 
-/*** defines ***/
+/* defines */
 
 #define KILO_TAB_STOP 8
 #define KILO_QUIT_TIMES 3
@@ -51,7 +51,7 @@ enum editor_highlight {
 #define HL_HIGHLIGHT_NUMBERS (1 << 0)
 #define HL_HIGHLIGHT_STRINGS (1 << 1)
 
-/*** data ***/
+/* data */
 
 struct editor_syntax {
 	char *filetype;
@@ -92,7 +92,7 @@ struct editor_config {
 
 struct editor_config e;
 
-/*** filetypes ***/
+/* filetypes */
 
 char *C_HL_extensions[] = {
 	".c",
@@ -142,13 +142,13 @@ struct editor_syntax HLDB[] = {
 
 #define HLDB_ENTRIES (sizeof(HLDB) / sizeof(HLDB[0]))
 
-/*** prototypes ***/
+/* prototypes */
 
 void editor_set_status_message(const char *fmt, ...);
 void editor_refresh_screen();
 char *editor_prompt(char *prompt, void (*callback)(char *, int));
 
-/*** terminal ***/
+/* terminal */
 
 void die_cur(const char *s) {
 	perror(s);
@@ -224,8 +224,7 @@ int editor_read_key() {
 						case '8':
 							return END_KEY;
 					}
-			} 
-			else
+			} else
 				switch (seq[1]) {
 					case 'A':
 						return ARROW_UP;
@@ -245,8 +244,7 @@ int editor_read_key() {
 					case 'F':
 						return END_KEY;
 				}
-		} 
-		else if (seq[0] == 'O')
+		} else if (seq[0] == 'O')
 			switch (seq[1]) {
 				case 'H':
 					return HOME_KEY;
@@ -255,8 +253,7 @@ int editor_read_key() {
 					return END_KEY;
 			}
 		return '\x1b';
-	} 
-	else
+	} else
 		return c;
 }
 
@@ -286,15 +283,14 @@ int get_window_size(int *rows, int *cols) {
 		if (write(STDOUT_FILENO, "\x1b[999C\x1b[999B", 12) != 12)
 			return -1;
 		return get_cursor_position(rows, cols);
-	} 
-	else {
+	} else {
 		*cols = ws.ws_col;
 		*rows = ws.ws_row;
 		return 0;
 	}
 }
 
-/*** syntax highlighting ***/
+/* syntax highlighting */
 
 int is_separator(int c) {
 	return isspace(c) || c == '\0' || strchr(",.()+-/*=~%<>[];", c) != NULL;
@@ -333,13 +329,11 @@ void editor_update_syntax(erow *row) {
 					in_comment = 0;
 					prev_sep = 1;
 					continue;
-				} 
-				else {
+				} else {
 					i++;
 					continue;
 				}
-			} 
-			else if (!strncmp(&row->render[i], mcs, mcs_len)) {
+			} else if (!strncmp(&row->render[i], mcs, mcs_len)) {
 				memset(&row->hl[i], HL_MLCOMMENT, mcs_len);
 				i += mcs_len;
 				in_comment = 1;
@@ -359,8 +353,7 @@ void editor_update_syntax(erow *row) {
 				i++;
 				prev_sep = 1;
 				continue;
-			} 
-			else if (c == '"' || c == '\'') {
+			} else if (c == '"' || c == '\'') {
 				in_string = c;
 				row->hl[i] = HL_STRING;
 				i++;
@@ -449,7 +442,7 @@ void editor_select_syntax_highlight() {
 	}
 }
 
-/*** row operations ***/
+/* row operations */
 
 int editor_row_cx_to_rx(erow *row, int cx) {
 	int rx = 0;
@@ -489,8 +482,7 @@ void editor_update_row(erow *row) {
 			row->render[idx++] = ' ';
 			while (idx % KILO_TAB_STOP != 0)
 				row->render[idx++] = ' ';
-		} 
-		else
+		} else
 			row->render[idx++] = row->chars[j];
 	}
 	row->render[idx] = '\0';
@@ -565,7 +557,7 @@ void editor_row_del_char(erow *row, int at) {
 	e.dirty++;
 }
 
-/*** editor operations ***/
+/* editor operations */
 
 void editor_insert_char(int c) {
 	if (e.cy == e.numrows)
@@ -598,8 +590,7 @@ void editor_del_char() {
 	if (e.cx > 0) {
 		editor_row_del_char(row, e.cx - 1);
 		e.cx--;
-	}
-	else {
+	} else {
 		e.cx = e.row[e.cy - 1].size;
 		editor_row_append_string(&e.row[e.cy - 1], row->chars, row->size);
 		editor_del_row(e.cy);
@@ -607,7 +598,7 @@ void editor_del_char() {
 	}
 }
 
-/*** file i/o ***/
+/* file i/o */
 
 char *editor_rows_to_string(int *buflen) {
 	int totlen = 0;
@@ -673,7 +664,7 @@ void editor_save() {
 	editor_set_status_message("Can't save! I/O error: %s", strerror(errno));
 }
 
-/*** find ***/
+/* find */
 
 void editor_find_callback(char *query, int key) {
 	static int last_match = -1;
@@ -740,7 +731,7 @@ void editor_find() {
 	}
 }
 
-/*** append buffer ***/
+/* append buffer */
 
 struct abuf {
 	char *b;
@@ -762,7 +753,7 @@ void ab_free(struct abuf *ab) {
 	free(ab->b);
 }
 
-/*** output ***/
+/* output */
 
 void editor_scroll() {
 	e.rx = 0;
@@ -786,8 +777,7 @@ void editor_draw_rows(struct abuf *ab) {
 			ab_append(ab, "\x1b[94m", 5);
 			ab_append(ab, "~", 1);
 			ab_append(ab, "\x1b[39m", 5);
-		}
-		else {
+		} else {
 			int len = e.row[filerow].rsize - e.coloff;
 			if (len < 0)
 				len = 0;
@@ -808,15 +798,13 @@ void editor_draw_rows(struct abuf *ab) {
 						int clen = snprintf(buf, sizeof(buf), "\x1b[%dm", current_color);
 						ab_append(ab, buf, clen);
 					}
-				} 
-				else if (hl[j] == HL_NORMAL) {
+				} else if (hl[j] == HL_NORMAL) {
 					if (current_color != -1) {
 						ab_append(ab, "\x1b[39m", 5);
 						current_color = -1;
 					}
 					ab_append(ab, &c[j], 1);
-				} 
-				else {
+				} else {
 					int color = editor_syntax_to_color(hl[j]);
 					if (color != current_color) {
 						current_color = color;
@@ -846,8 +834,7 @@ void editor_draw_status_bar(struct abuf *ab) {
 		if (e.screencols - len == rlen) {
 			ab_append(ab, rstatus, rlen);
 			break;
-		}
-		else {
+		} else {
 			ab_append(ab, " ", 1);
 			len++;
 		}
@@ -889,7 +876,7 @@ void editor_set_status_message(const char *fmt, ...) {
 	e.statusmsg_time = time(NULL);
 }
 
-/*** input ***/
+/* input */
 
 char *editor_prompt(char *prompt, void (*callback)(char *, int)) {
 	size_t bufsize = 128;
@@ -903,23 +890,20 @@ char *editor_prompt(char *prompt, void (*callback)(char *, int)) {
 		if (c == DEL_KEY || c == CTRL_KEY('h') || c == BACKSPACE) {
 			if (buflen != 0)
 				buf[--buflen] = '\0';
-		}
-		else if (c == '\x1b') {
+		} else if (c == '\x1b') {
 			editor_set_status_message("");
 			if (callback)
 				callback(buf, c);
 			free(buf);
 			return NULL;
-		}
-		else if (c == '\r') {
+		} else if (c == '\r') {
 			if (buflen != 0) {
 				editor_set_status_message("");
 				if (callback)
 					callback(buf, c);
 				return buf;
 			}
-		}
-		else if (!iscntrl(c) && c < 128) {
+		} else if (!iscntrl(c) && c < 128) {
 			if (buflen == bufsize - 1) {
 				bufsize *= 2;
 				buf = realloc(buf, bufsize);
@@ -1046,7 +1030,7 @@ void editor_process_keypress() {
 	quit_times = KILO_QUIT_TIMES;
 }
 
-/*** init ***/
+/* init */
 
 void init_editor() {
 	e.cx = 0;
