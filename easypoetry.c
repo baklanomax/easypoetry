@@ -963,7 +963,7 @@ void editor_process_keypress() {
 
 		case CTRL_KEY('q'):
 			if (e.dirty && quit_times > 0) {
-				editor_set_status_message("WARNING!!! File has unsaved changes. " "Press Ctrl-Q %d more times to quit.", quit_times);
+				editor_set_status_message("WARNING!!! File has unsaved changes. Press Ctrl-Q %d more times to quit.", quit_times);
 				quit_times--;
 				return;
 			}
